@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Button from "./components/Button";
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export default function App() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,7 +19,7 @@ export default function App() {
   const claimCoupon = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:5000/coupons/claim");
+      const response = await fetch(`${BASE_URL}/coupons/claim`);
       const data = await response.json();
       console.log(data)
       
