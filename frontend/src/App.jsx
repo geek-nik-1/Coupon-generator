@@ -12,13 +12,12 @@ export default function App() {
     return savedCooldown ? Math.max(0, (parseInt(savedCooldown) - Date.now()) / 1000) : null;
   });
 
-  // Timer countdown effect
   useEffect(() => {
     if (timeLeft > 0) {
       const interval = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            localStorage.removeItem("cooldown"); // Remove cooldown when expired
+            localStorage.removeItem("cooldown"); 
             clearInterval(interval);
             return 0;
           }
@@ -66,6 +65,7 @@ export default function App() {
         {timeLeft > 0 && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 text-lg text-white">
             ⏳ Please wait {Math.floor(timeLeft / 60)}m {Math.floor(timeLeft % 60)}s before claiming again.
+
           </motion.p>
         )}
 
