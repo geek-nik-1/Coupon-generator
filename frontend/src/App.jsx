@@ -7,26 +7,12 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 export default function App() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(() => {
-    // Check if cooldown exists in localStorage
-    const savedCooldown = localStorage.getItem("cooldown");
-    return savedCooldown ? Math.max(0, (parseInt(savedCooldown) - Date.now()) / 1000) : null;
-  });
+  const [timeLeft, setTimeLeft] = useState(null);
 
-  // Countdown effect
   useEffect(() => {
     if (timeLeft > 0) {
-      const interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            localStorage.removeItem("cooldown"); // Remove cooldown when expired
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
+      const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
+      return () => clearInterval(timer);
     }
   }, [timeLeft]);
 
@@ -35,17 +21,14 @@ export default function App() {
     try {
       const response = await fetch(`${BASE_URL}/coupons/claim`);
       const data = await response.json();
-      console.log(data);
+      console.log(data)
       
-      setMessage(data.message);
-
-      // If backend returns a cooldown time, store it
       if (data.message.includes("minutes")) {
         const minutes = parseInt(data.message.match(/\d+/)[0], 10);
-        const cooldownTime = minutes * 60 * 1000; // Convert to milliseconds
-        localStorage.setItem("cooldown", Date.now() + cooldownTime);
-        setTimeLeft(cooldownTime / 1000); // Set timer in seconds
+        setTimeLeft(minutes * 60);
       }
+      
+      setMessage(data.message);
     } catch (error) {
       setMessage("Error claiming coupon. Please try again.");
     }
@@ -64,12 +47,6 @@ export default function App() {
         <p className="text-white/80 mb-4">Click the button below to claim a coupon. Limited availability.</p>
 
         <Button onClick={claimCoupon} disabled={loading || timeLeft} loading={loading} timeLeft={timeLeft} />
-
-        {timeLeft > 0 && (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 text-lg text-white">
-            ⏳ Please wait {Math.floor(timeLeft / 60)}m {Math.floor(timeLeft % 60)}s before claiming again.
-          </motion.p>
-        )}
 
         {message && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 text-lg text-white">
